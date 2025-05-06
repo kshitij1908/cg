@@ -160,3 +160,265 @@ int main(int argc, char** argv) {
 
     return 0;
 }
+
+
+#include <GL/glut.h>
+#include <iostream>
+#include<cmath>
+int sign(float a){
+if(a<0){
+return -1;
+}
+else if (a=0){
+return 0;
+}
+else {
+return 1;
+}
+}
+
+void ddaLine(int x0, int y0, int x1, int y1) {
+float length;
+  if(abs(x1-x0)>abs(y1-y0)){
+      length=abs(x1-x0);
+  }
+  else{
+     length=abs(y1-y0);
+  }
+   
+   
+   float dx=(x1-x0)/length;
+   float dy=(y1-y0)/length;
+   
+    float x =x0+0.5*sign(dx);
+    float y =y0+0.5*sign(dy);
+    glBegin(GL_POINTS);
+    for(int i=0; i<=length; i++){
+   
+     glVertex2f(round(x),round(y));
+     x+=dx;
+     y+=dy;
+     }
+     glEnd();
+}
+
+void dda_dotted_line(int x0, int y0, int x1, int y1) {
+float length;
+  if(abs(x1-x0)>abs(y1-y0)){
+      length=abs(x1-x0);
+  }
+  else{
+     length=abs(y1-y0);
+  }
+   
+   
+   float dx=(x1-x0)/length;
+   float dy=(y1-y0)/length;
+   
+    float x =x0+0.5*sign(dx);
+    float y =y0+0.5*sign(dy);
+    glBegin(GL_POINTS);
+    for(int i=0; i<=length; i++){
+    if(i%4==0){
+     glVertex2f(round(x),round(y));
+     }
+     x+=dx;
+     y+=dy;
+     }
+     glEnd();
+}
+
+void dda_dashed_line(int x0, int y0, int x1, int y1) {
+float length;
+  if(abs(x1-x0)>abs(y1-y0)){
+      length=abs(x1-x0);
+  }
+  else{
+     length=abs(y1-y0);
+  }
+   
+   
+   float dx=(x1-x0)/length;
+   float dy=(y1-y0)/length;
+   
+    float x =x0+0.5*sign(dx);
+    float y =y0+0.5*sign(dy);
+    glBegin(GL_POINTS);
+    for(int i=0; i<=length; i++){
+    if(i%8<5){
+     glVertex2f(round(x),round(y));
+     }
+     x+=dx;
+     y+=dy;
+     }
+     glEnd();
+}
+
+
+void dda_center_dotted_line(int x0, int y0, int x1, int y1) {
+float length;
+  if(abs(x1-x0)>abs(y1-y0)){
+      length=abs(x1-x0);
+  }
+  else{
+     length=abs(y1-y0);
+  }
+   
+   
+   float dx=(x1-x0)/length;
+   float dy=(y1-y0)/length;
+   
+    float x =x0+0.5*sign(dx);
+    float y =y0+0.5*sign(dy);
+    glBegin(GL_POINTS);
+    for(int i=0; i<=length; i++){
+   
+    if(i%20==5){
+     glVertex2f(round(x),round(y));
+     }
+     
+     x+=dx;
+     y+=dy;
+     }
+     glEnd();
+}
+
+void drawTriangularWave(int x_start, int y_base, int amplitude, int wavelength, int cycles) {
+    int x = x_start;
+    for (int i = 0; i < cycles; i++) {
+        // Rising slope
+        ddaLine(x, y_base, x + wavelength / 2, y_base + amplitude);
+        // Falling slope
+        ddaLine(x + wavelength / 2, y_base + amplitude, x + wavelength, y_base);
+        x += wavelength;
+    }
+}
+
+void drawSquareWave(int x_start, int y_base, int amplitude, int wavelength, int cycles) {
+    int x = x_start;
+    for (int i = 0; i < cycles; i++) {
+        // Top horizontal line
+        ddaLine(x, y_base + amplitude, x + wavelength / 2, y_base + amplitude);
+        // Falling edge
+        ddaLine(x + wavelength / 2, y_base + amplitude, x + wavelength / 2, y_base);
+        // Bottom horizontal line
+        ddaLine(x + wavelength / 2, y_base, x + wavelength, y_base);
+        // Rising edge
+        ddaLine(x + wavelength, y_base, x + wavelength, y_base + amplitude);
+        x += wavelength;
+    }
+}
+
+void drawAxes() {
+    glColor3f(1.0f, 1.0f, 1.0f); // White color for axis
+    ddaLine(0, 750, 1500, 750); // X-axis
+    ddaLine(750, 0, 750, 1500); // Y-axis
+}
+
+void menu(int option) {
+    glClear(GL_COLOR_BUFFER_BIT);
+    drawAxes(); // Always draw axes
+
+    switch (option) {
+        case 1: // Simple line in top-right quadrant
+            ddaLine(1000, 1100, 1250, 1150);
+            break;
+        case 2: // Dotted line in top-left quadrant
+            dda_dotted_line(250, 1100, 500, 1150);
+            break;
+        case 3: // Dashed line in bottom-left quadrant
+            dda_dashed_line(250, 350, 500, 400);
+            break;
+        case 4: // Center-dotted line in bottom-right quadrant
+            dda_center_dotted_line(1000, 350, 1250, 400);
+            break;
+        case 5: // Triangular wave in top-left
+            drawTriangularWave(200, 1300, 50, 50, 8);  // (x_start, y_base, amplitude, wavelength, cycles)
+            break;
+        case 6: // Square wave in top-right
+            drawSquareWave(900, 1300, 50, 50, 8);      // (x_start, y_base, amplitude, wavelength, cycles)
+            break;
+            case 7:
+            // All lines
+            ddaLine(800, 1100, 900, 900);
+            ddaLine(1300, 1100, 1200, 900);
+            ddaLine(800, 1100, 1300, 1100);
+            ddaLine(900, 900, 1200, 900);
+            ddaLine(900, 1100, 1100, 1200);
+            ddaLine(1100, 1100, 1100, 1200);
+            ddaLine(0, 750, 1500, 750);
+            ddaLine(750, 1500, 750, 0);
+            break;
+            case 8:
+            drawAxes();
+            break;
+    
+    
+    }
+
+    glFlush();
+}
+
+
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT);
+   
+
+    ddaLine(50, 800, 400, 900);  
+   dda_dotted_line(60,60,400,400);
+   dda_dashed_line(100,200,1400,1500);
+   dda_center_dotted_line(50,400,1345,900);
+   ddaLine(800,1100,900,900);
+   ddaLine(1300,1100,1200,900);
+   ddaLine(800,1100,1300,1100);
+   ddaLine(900,900,1200,900);
+   ddaLine(900,1100,1100,1200);
+   ddaLine(1100,1100,1100,1200);
+   ddaLine(0,750,1500,750);
+   ddaLine(750,1500,750,0);
+       // Triangular wave: (startX, baseY, amplitude, wavelength, number of cycles)
+   drawTriangularWave(100, 200, 100, 100, 10);
+
+       // Square wave: (startX, baseY, amplitude, wavelength, number of cycles)
+   drawSquareWave(100, 500, 100, 100, 10);
+  
+    glClear(GL_COLOR_BUFFER_BIT);
+    glFlush();
+
+
+ 
+    glFlush();  
+}
+
+void initOpenGL() {
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);  
+    glMatrixMode(GL_PROJECTION);  
+    glLoadIdentity();  
+    gluOrtho2D(0.0, 1500.0, 0.0, 1500.0);  
+}
+int main(int argc, char** argv) {
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowSize(1200,1200);
+    glutCreateWindow("DDA Line Drawing");
+
+    glutCreateMenu(menu);
+    glutAddMenuEntry("Simple DDA Line", 1);
+    glutAddMenuEntry("Dotted Line", 2);
+    glutAddMenuEntry("Dashed Line", 3);
+    glutAddMenuEntry("Center Dotted Line", 4);
+    glutAddMenuEntry("Triangular Wave", 5);
+    glutAddMenuEntry("Square Wave", 6);
+    glutAddMenuEntry("All Other DDA Lines", 7);
+    glutAddMenuEntry("Draw Axes", 8);
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
+    
+
+
+    initOpenGL();
+   
+    glutDisplayFunc(display);
+    glutMainLoop();  
+
+    return 0;
+}
