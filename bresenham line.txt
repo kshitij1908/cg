@@ -1,0 +1,206 @@
+#include <GL/glut.h>
+#include <iostream>
+using namespace std;
+
+void plot(int x, int y) {
+    glBegin(GL_POINTS);
+    glVertex2i(x, y);
+    glEnd();
+}
+
+void bresenham(int x1, int y1, int x2, int y2) {
+    int dx = abs(x2 - x1);
+    int dy = abs(y2 - y1);
+    int sx = (x2 >= x1) ? 1 : -1;
+    int sy = (y2 >= y1) ? 1 : -1;
+
+    int x = x1;
+    int y = y1;
+    plot(x, y);
+
+    if (dx > dy) {
+        int p = 2 * dy - dx;
+        for (int i = 0; i < dx; i++) {
+            x += sx;
+            if (p < 0) {
+                p += 2 * dy;
+            } else {
+                y += sy;
+                p += 2 * (dy - dx);
+            }
+            plot(x, y);
+        }
+    } else {
+        int p = 2 * dx - dy;
+        for (int i = 0; i < dy; i++) {
+            y += sy;
+            if (p < 0) {
+                p += 2 * dx;
+            } else {
+                x += sx;
+                p += 2 * (dx - dy);
+            }
+            plot(x, y);
+        }
+    }
+}
+
+void bresenhamDotted(int x1, int y1, int x2, int y2) {
+    int dx = abs(x2 - x1);
+    int dy = abs(y2 - y1);
+    int sx = (x2 >= x1) ? 1 : -1;
+    int sy = (y2 >= y1) ? 1 : -1;
+
+    int x = x1;
+    int y = y1;
+    int count = 0;
+
+    if (dx > dy) {
+        int p = 2 * dy - dx;
+        for (int i = 0; i <= dx; i++) {
+            if (count % 4 == 0) plot(x, y); // Plot every 4th point (dotted effect)
+            x += sx;
+            if (p < 0) {
+                p += 2 * dy;
+            } else {
+                y += sy;
+                p += 2 * (dy - dx);
+            }
+            count++;
+        }
+    } else {
+        int p = 2 * dx - dy;
+        for (int i = 0; i <= dy; i++) {
+            if (count % 4 == 0) plot(x, y);
+            y += sy;
+            if (p < 0) {
+                p += 2 * dx;
+            } else {
+                x += sx;
+                p += 2 * (dx - dy);
+            }
+            count++;
+        }
+    }
+}
+
+void bresenhamDashed(int x1, int y1, int x2, int y2) {
+    int dx = abs(x2 - x1), dy = abs(y2 - y1);
+    int sx = (x2 >= x1) ? 1 : -1;
+    int sy = (y2 >= y1) ? 1 : -1;
+
+    int x = x1, y = y1;
+    int count = 0;
+
+    if (dx > dy) {
+        int p = 2 * dy - dx;
+        for (int i = 0; i <= dx; i++) {
+            if ((count / 5) % 2 == 0) plot(x, y); // 5 pixels on, 5 off
+            x += sx;
+            if (p < 0) p += 2 * dy;
+            else { y += sy; p += 2 * (dy - dx); }
+            count++;
+        }
+    } else {
+        int p = 2 * dx - dy;
+        for (int i = 0; i <= dy; i++) {
+            if ((count / 5) % 2 == 0) plot(x, y);
+            y += sy;
+            if (p < 0) p += 2 * dx;
+            else { x += sx; p += 2 * (dx - dy); }
+            count++;
+        }
+    }
+}
+
+
+void bresenhamCenterDotted(int x1, int y1, int x2, int y2) {
+    int dx = abs(x2 - x1), dy = abs(y2 - y1);
+    int sx = (x2 >= x1) ? 1 : -1;
+    int sy = (y2 >= y1) ? 1 : -1;
+
+    int x = x1, y = y1;
+    int count = 0;
+
+    if (dx > dy) {
+        int p = 2 * dy - dx;
+        for (int i = 0; i <= dx; i++) {
+            if ((count / 10) % 2 == 0 && count % 10 == 5) plot(x, y); // dot in center of each 10-pixel segment
+            x += sx;
+            if (p < 0) p += 2 * dy;
+            else { y += sy; p += 2 * (dy - dx); }
+            count++;
+        }
+    } else {
+        int p = 2 * dx - dy;
+        for (int i = 0; i <= dy; i++) {
+            if ((count / 10) % 2 == 0 && count % 10 == 5) plot(x, y);
+            y += sy;
+            if (p < 0) p += 2 * dx;
+            else { x += sx; p += 2 * (dx - dy); }
+            count++;
+        }
+    }
+}
+
+
+
+void drawAxes() {
+    glColor3f(0.0f, 1.0f, 0.0f); // Green color for axes
+
+    glBegin(GL_LINES);
+    // X-axis from left to right
+    glVertex2i(-500, 0);
+    glVertex2i(500, 0);
+
+    // Y-axis from bottom to top
+    glVertex2i(0, -500);
+    glVertex2i(0, 500);
+    glEnd();
+}
+
+
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT);
+    drawAxes();
+
+    glColor3f(1.0f, 1.0f, 1.0f);  // White - Solid Line in Quadrant I
+    bresenham(50, 50, 300, 200);
+
+    glColor3f(1.0f, 0.0f, 0.0f);  // Red - Dotted Line in Quadrant II
+    bresenhamDotted(-300, 100, -50, 300);
+
+    glColor3f(1.0f, 1.0f, 0.0f);  // Yellow - Dashed Line in Quadrant III
+    bresenhamDashed(-300, -200, -50, -50);
+
+    glColor3f(0.0f, 1.0f, 1.0f);  // Cyan - Center-Dotted Line in Quadrant IV
+    bresenhamCenterDotted(100, -100, 400, -300);
+
+    glFlush();
+}
+
+
+
+void init() {
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Black background
+    glColor3f(1.0f, 1.0f, 1.0f);          // White drawing color
+    glPointSize(2.0);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+    // Set coordinate system: origin at center
+    gluOrtho2D(-500, 500, -500, 500);
+}
+
+
+int main(int argc, char** argv) {
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowSize(500, 500);
+    glutInitWindowPosition(100, 100);
+    glutCreateWindow("Bresenham's Line Drawing Algorithm");
+    init();
+    glutDisplayFunc(display);
+    glutMainLoop();
+    return 0;
+}

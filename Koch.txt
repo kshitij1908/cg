@@ -1,0 +1,63 @@
+#include <GL/glut.h>
+#include <cmath>
+
+void drawKochCurve(float x1, float y1, float x5, float y5, int depth) {
+    if (depth == 0) {
+        glVertex2f(x1, y1);
+        glVertex2f(x5, y5);
+        return;
+    }
+
+    
+    float x2 = (2*x1 + x5) / 3.0f;
+    float y2 = (2*y1 + y5) / 3.0f;
+
+    float x4 = (x1 + 2*x5) / 3.0f;
+    float y4 = (y1 + 2*y5) / 3.0f;
+
+   
+    float dx = x4 - x2;
+    float dy = y4 - y2;
+
+    float x3 = x2 + (dx * cos(3.146 / 3.0f) - dy * sin(3.146 / 3.0f));
+    float y3 = y2 + (dx * sin(3.146 / 3.0f) + dy * cos(3.146 / 3.0f));
+
+   
+    drawKochCurve(x1, y1, x2, y2, depth - 1);
+    drawKochCurve(x2, y2, x3, y3, depth - 1);
+    drawKochCurve(x3, y3, x4, y4, depth - 1);
+    drawKochCurve(x4, y4, x5, y5, depth - 1);
+}
+
+
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT);
+    glColor3f(0.0f, 0.0f, 1.0f);  
+
+    glBegin(GL_LINES);
+    drawKochCurve(-0.5f, -0.3f, 0.0f, 0.577f, 2); 
+    drawKochCurve(0.0f, 0.577f, 0.5f, -0.3f, 2);
+    drawKochCurve(0.5f, -0.3f, -0.5f, -0.3f, 2);
+    glEnd();
+
+    glFlush();
+}
+
+
+void init() {
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);  
+    glColor3f(0.0f, 0.0f, 0.0f);          
+    glMatrixMode(GL_PROJECTION);
+    gluOrtho2D(-1.0, 1.0, -1.0, 1.0);     
+}
+
+int main(int argc, char** argv) {
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowSize(800, 600);
+    glutCreateWindow("Koch Curve using Rotation");
+    init();
+    glutDisplayFunc(display);
+    glutMainLoop();
+    return 0;
+}
